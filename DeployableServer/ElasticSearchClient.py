@@ -120,7 +120,7 @@ class ElasticSearchClient(object):
         for id in line_ids:
             self.es.index(index=self.index, doc_type='us_office_lines', id=id, body=quotes[id])
 
-    def search(self, text):suggested9]scientists]smell]Two
+    def search(self, text):
         res = self.es.search(index=self.index, body=self.boolMatchQuery(text))
         res_list = []
         i = 0
