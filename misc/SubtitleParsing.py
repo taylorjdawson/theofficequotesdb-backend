@@ -74,6 +74,8 @@ def subtitlesToJson(subtitles, season, episode):
 
 def subtitlesFolderWalk(folderPath):
     episodes = []
+    folderPath = os.path.join(os.path.expanduser("~"), 'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS')
+
     for (dirname, dirs, files) in os.walk(folderPath):
         episodes = files
 
@@ -86,6 +88,5 @@ def subtitlesFolderWalk(folderPath):
     with open('quote_db.json', 'w') as outfile:
         json.dump(quotes, outfile, sort_keys=True, indent=4)
 
-subtitlesFolderWalk('C:\\Users\Levi\PycharmProjects\TheOfficeQuoteDatabase\Subtitles\TheOfficeUS')
+subtitlesFolderWalk('/TheOfficeUS')
 
-# convertFilesToUTF8('./Subtitles')

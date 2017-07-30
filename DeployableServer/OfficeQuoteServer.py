@@ -3,7 +3,7 @@ import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib import parse
 
-from DeployableServer.github_issue import make_github_issue
+# from DeployableServer.github_issue import make_github_issue
 
 from DeployableServer.ElasticSearchClient import ElasticSearchClient
 
@@ -20,17 +20,20 @@ class myHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
 
+
+
+
         #Decode path
         path = parse.unquote(self.path)
 
         # Check to see if the URL matches
-        search = re.match('/_search\?q=(?P<query>.*)', path)
-        issue = re.match('/issue/')
+        search = re.match('/\?search=(?P<query>.*)', path)
+        # issue = re.match('/issue/')
 
 
         # Try to grab the command group from the match object
         try:
-            query = m.group('query')
+            query = search.group('query')
 
         except AttributeError:
             query = ''
@@ -38,7 +41,8 @@ class myHandler(BaseHTTPRequestHandler):
         #Send query to Elasticsearch Client
         results = es.search(query)
 
-        self.wfile.write(json.dumps(results).encode())
+        # self.wfile.write(json.dumps(results).encode())
+        print(results)
         return
 
     def do_POST(self):
