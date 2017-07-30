@@ -113,6 +113,7 @@ class ElasticSearchClient(object):
         return self.es.indices.stats()['_all']['primaries']['indexing']['index_total']
 
     def indexES(self):
+
         self.es.indices.delete("index")
         quotes = self.loadJSONFile()['lines']
         line_ids = quotes.keys()
@@ -126,7 +127,6 @@ class ElasticSearchClient(object):
         i = 0
         for hit in res['hits']['hits']:
             res_list.append(hit['_source'])
-            print(hit['_source']['line'])
             i += 1
         return res_list
 
