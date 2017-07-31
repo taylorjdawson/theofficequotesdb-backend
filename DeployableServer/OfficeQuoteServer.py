@@ -8,7 +8,7 @@ from urllib.parse import urlparse, parse_qs
 from DeployableServer.ElasticSearchClient import ElasticSearchClient
 
 es = ElasticSearchClient()
-es.indexES()
+# es.indexES()
 # This class will handles any incoming request from
 # the browser
 class myHandler(BaseHTTPRequestHandler):
@@ -21,31 +21,24 @@ class myHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
-        #Decode path
-        path = parse.unquote(self.path)
-
+        #Grab path parameters
         params = parse_qs(urlparse(self.path).query)
-        print(params['search'])
-        # Check to see if the URL matches
-        search = re.match('/\?search=(?P<query>.*)', path)
-        # issue = re.match('/issue/')
 
-        #TODO: Handel empy query
-
-        #TODO: Put the query inside of try
+        # issue = params['issue']
 
         #TODO: Possible Handle a redirect for going to watch video
 
-
         # Try to grab the command group from the match object
         try:
-            query = search.group('query')
+            query = params['search'][0]
+
+            # Send query to Elasticsearch Client
+            results = es.search(query)
 
         except AttributeError:
-            query = ''
+            results = ''
 
-        #Send query to Elasticsearch Client
-        results = es.search(query)
+
 
         self.wfile.write(json.dumps(results).encode())
         return
