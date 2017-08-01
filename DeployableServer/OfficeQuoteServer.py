@@ -1,11 +1,14 @@
+import cgi
 import json
+
 import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib import parse
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 # from DeployableServer.github_issue import make_github_issue
 
 from DeployableServer.ElasticSearchClient import ElasticSearchClient
+from DeployableServer.github_issue import make_github_issue
 
 es = ElasticSearchClient()
 # es.indexES()
@@ -13,13 +16,15 @@ es = ElasticSearchClient()
 # the browser
 class myHandler(BaseHTTPRequestHandler):
 
-    # Handler for the GET requests
-    def do_GET(self):
-
+    def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
+
+    # Handler for the GET requests
+    def do_GET(self):
+        self._set_headers()
 
         #Grab path parameters
         params = parse_qs(urlparse(self.path).query)
@@ -38,20 +43,35 @@ class myHandler(BaseHTTPRequestHandler):
         except AttributeError:
             results = ''
 
-
-
         self.wfile.write(json.dumps(results).encode())
         return
 
+    def do_HEAD(self):
+        self._set_headers()
+
     def do_POST(self):
-        content_len = int(self.headers.getheader('content-length'))
-        post_body = self.rfile.read(content_len)
-        self.send_response(200)
-        self.end_headers()
+        self._set_headers()
+        request_path = self.path
 
-        print(content_len)
-        print(json.dumps(post_body, indent=True))
+        request_headers = self.headers
+        content_length = request_headers.get('content-length')
+        length = int(content_length) if content_length else 0
 
+        data = unquote(self.rfile.read(length).decode("utf-8"))
+
+        data = unquote(data)
+        print(data)
+
+        m = re.match("issue_type=(?P<issue_type>.*)&issue_text=(?P<issue_text>.*)&line_id=(?P<line_id>.*)&line=(?P<line>.*)"
+                     , data)
+
+        issue_content = dict(zip(("type", "message", "line_id", "line"), m.groups()))
+
+        status = make_github_issue(issue_content)
+
+        self.wfile.write(json.dumps(status).encode())
+
+    #  "issue_type=Broken+Link&issue_text="
     def do_OPTIONS(self):
         self.send_response(200, "ok")
         self.send_header('Access-Control-Allow-Origin', '*')

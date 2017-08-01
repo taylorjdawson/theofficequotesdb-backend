@@ -88,5 +88,6 @@ def subtitlesFolderWalk(folderPath):
     with open('quote_db.json', 'w') as outfile:
         json.dump(quotes, outfile, sort_keys=True, indent=4)
 
+# TODO: IMPORTANT DO NOT OVERWRITE ONLY APPEND. I have made changes to some quotes in the json file
 subtitlesFolderWalk('/TheOfficeUS')
 
