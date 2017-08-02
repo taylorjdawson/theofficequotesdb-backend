@@ -37,6 +37,8 @@ number = {
 }
 
 def convertFilesToUTF8(folderPath):
+    folderPath = os.path.join(os.path.expanduser("~"),
+                              'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS\\' + folderPath)
     for (dirname, dirs, files) in os.walk(folderPath):
         for filename in files:
             with io.open(folderPath + '/' + filename, 'r') as f:
@@ -45,6 +47,7 @@ def convertFilesToUTF8(folderPath):
             with io.open(folderPath + '/' +filename, 'w', encoding='utf8') as f:
                 f.write(text)
                 f.close()
+            print("Converted:", filename)
 
 def quoteJSON(line_id, time, line, season, episode):
     (min, sec) = time
@@ -60,7 +63,7 @@ def quoteJSON(line_id, time, line, season, episode):
             'number': line_id[:2]
         },
         'episode' : {
-            'text': season,
+            'text': episode,
             'number': line_id[2:4]
         },
     }
@@ -74,20 +77,51 @@ def subtitlesToJson(subtitles, season, episode):
 
 def subtitlesFolderWalk(folderPath):
     episodes = []
-    folderPath = os.path.join(os.path.expanduser("~"), 'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS')
+
+
+    folderPath = os.path.join(os.path.expanduser("~"), 'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS\{}'.format(folderPath))
 
     for (dirname, dirs, files) in os.walk(folderPath):
         episodes = files
 
     for episode in episodes:
         subs = pysrt.open(folderPath + '\\' + episode, encoding='utf-8')
-        m = re.match(r'(?P<season>S[0-9]{2}){1}(?P<episode>E[0-9]{2}){1}', episode)
-        season = m.group('season').replace('S','')
-        episode = m.group('episode').replace('E','')
+        season, episode = re.match(r'(?P<season>[0-9]{2}){1}(?P<episode>[0-9]{2}){1}', episode).groups()
+
         subtitlesToJson(subs, season, episode)
-    with open('quote_db.json', 'w') as outfile:
+
+    with open('quote_db_s2.json', 'w') as outfile:
         json.dump(quotes, outfile, sort_keys=True, indent=4)
 
-# TODO: IMPORTANT DO NOT OVERWRITE ONLY APPEND. I have made changes to some quotes in the json file
-subtitlesFolderWalk('/TheOfficeUS')
+def renameFiles(folderPath):
+    se = '0'+ folderPath[-1]
+    episodes = []
+    folderPath = os.path.join(os.path.expanduser("~"),
+                              'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS\\' + folderPath)
+    for (dirname, dirs, files) in os.walk(folderPath):
+        episodes = files
 
+    filenames = getEpisodeId(se)
+
+    for i in range(len(episodes)):
+        ep = re.match('S04E(?P<ep>[0-9]{2})',episodes[i]).group('ep')
+        # ep = re.match('The Office \[%s.(?P<ep>[0-9]{2})\]' % se, episode).group('ep')
+        os.rename(folderPath + '\\' + episodes[i], folderPath + '\\' + '{0:}{1:}'.format(se, ep))
+
+def getEpisodeId(se):
+    with open('C:\\Users\\tjdaw\PycharmProjects\\theofficequotesdb-backend\misc\episode_links', 'rb') as fb:
+        ep_links = json.load(fb)
+        ids = []
+        for (id, link) in ep_links.items():
+            if re.match('%s'%se, id):
+                ids.append(id)
+        ids.sort()
+        return(ids)
+
+# renameFiles('Season2')
+
+# TODO: IMPORTANT DO NOT OVERWRITE ONLY APPEND. I have made changes to some quotes in the json file
+renameFiles('Season4')
+# print(getEpisodeId('06'))
+# convertFilesToUTF8('Season3')
+# subtitlesFolderWalk('Season2')

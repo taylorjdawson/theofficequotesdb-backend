@@ -7,6 +7,8 @@ logging.basicConfig(filename='githubissue.log', level=logging.DEBUG)
 
 access_token = "503a3a73add0c18a033161bd655a2dc72c994a18"
 
+# access_token = "21b54a004c6892bc26f205a48fcd10875189fe1a"
+
 
 # Authentication for user filing issue (must have read/write access to
 # repository to add issue to)
@@ -57,4 +59,9 @@ User message: {}
 
     return status
 
-# make_github_issue('User Submitted Issue', 'This is a test issue', ["typo"])
+# make_github_issue({
+#     "type": "typo",
+#     "message": "a Test",
+#     "line_id": "these is none",
+#     "line": "There is none"
+#                    })
