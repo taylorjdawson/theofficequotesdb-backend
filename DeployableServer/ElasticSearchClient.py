@@ -103,7 +103,7 @@ class ElasticSearchClient(object):
         self.index = 'index'
 
     def loadJSONFile(self):
-        with open('quote_db.json', 'rb') as fp:
+        with open('C:\\Users\\tjdaw\PycharmProjects\\theofficequotesdb-backend\misc\quote_db_s06.json', 'rb') as fp:
             return json.load(fp)
 
     def indexStats(self):
@@ -113,8 +113,6 @@ class ElasticSearchClient(object):
         return self.es.indices.stats()['_all']['primaries']['indexing']['index_total']
 
     def indexES(self):
-
-        self.es.indices.delete("index")
         quotes = self.loadJSONFile()['lines']
         line_ids = quotes.keys()
         create_quotes_index(self.es, self.index)
@@ -171,6 +169,9 @@ class ElasticSearchClient(object):
             }
         }}
 
+es = ElasticSearchClient()
+
+es.indexES()
 
 # # print(els.indexProgress())
 #

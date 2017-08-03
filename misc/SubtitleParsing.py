@@ -3,6 +3,7 @@ import re
 import pysrt
 import os, io
 import json
+import codecs
 
 
 quotes = {'lines' : {}}
@@ -32,7 +33,10 @@ number = {
     '22': 'twenty-two',
     '23': 'twenty-three',
     '24': 'twenty-four',
-    '25': 'twenty-five'
+    '25': 'twenty-five',
+    '26': 'twenty-six',
+    '27': 'twenty-seven',
+    '28': 'twenty-eight'
 
 }
 
@@ -41,13 +45,18 @@ def convertFilesToUTF8(folderPath):
                               'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS\\' + folderPath)
     for (dirname, dirs, files) in os.walk(folderPath):
         for filename in files:
-            with io.open(folderPath + '/' + filename, 'r') as f:
-                text = f.read()
-                f.close()
-            with io.open(folderPath + '/' +filename, 'w', encoding='utf8') as f:
-                f.write(text)
-                f.close()
-            print("Converted:", filename)
+            try:
+                with io.open(folderPath + '/' + filename, 'r', encoding='utf8') as f:
+                    text = f.read()
+                    f.close()
+                with io.open(folderPath + '/' + filename, 'w', encoding='utf8') as f:
+                    f.write(text)
+                    f.close()
+                    print("Converted:", filename)
+            except UnicodeDecodeError as e:
+                print("Not Converted:", filename, "Error:", e)
+
+
 
 def quoteJSON(line_id, time, line, season, episode):
     (min, sec) = time
@@ -69,11 +78,15 @@ def quoteJSON(line_id, time, line, season, episode):
     }
 
 def subtitlesToJson(subtitles, season, episode):
+    index = 0
     for subtitle in subtitles:
+        index += 1
         time = (subtitle.start.minutes, subtitle.start.seconds)
         line = re.sub('\n', ' ', subtitle.text)
-        line_id = season + episode + '{0:06d}'.format(subtitle.index)
+        line_id = season + episode + '{0:06d}'.format(index)
+
         quotes['lines'][line_id] = quoteJSON(line_id, time, line, number[season], number[episode])
+
 
 def subtitlesFolderWalk(folderPath):
     episodes = []
@@ -90,23 +103,23 @@ def subtitlesFolderWalk(folderPath):
 
         subtitlesToJson(subs, season, episode)
 
-    with open('quote_db_s2.json', 'w') as outfile:
+    with open('quote_db_s{:02d}.json'.format(int(season)), 'w') as outfile:
         json.dump(quotes, outfile, sort_keys=True, indent=4)
 
 def renameFiles(folderPath):
-    se = '0'+ folderPath[-1]
+    # se = '0'+ folderPath[-1]
     episodes = []
     folderPath = os.path.join(os.path.expanduser("~"),
                               'PycharmProjects\\theofficequotesdb-backend\Subtitles\TheOfficeUS\\' + folderPath)
     for (dirname, dirs, files) in os.walk(folderPath):
         episodes = files
 
-    filenames = getEpisodeId(se)
+    # filenames = getEpisodeId(se)
 
     for i in range(len(episodes)):
-        ep = re.match('S04E(?P<ep>[0-9]{2})',episodes[i]).group('ep')
+        # ep = re.match('S04E(?P<ep>[0-9]{2})',episodes[i]).group('ep')
         # ep = re.match('The Office \[%s.(?P<ep>[0-9]{2})\]' % se, episode).group('ep')
-        os.rename(folderPath + '\\' + episodes[i], folderPath + '\\' + '{0:}{1:}'.format(se, ep))
+        os.rename(folderPath + '\\' + episodes[i], folderPath + '\\' + episodes[i] + '.srt')
 
 def getEpisodeId(se):
     with open('C:\\Users\\tjdaw\PycharmProjects\\theofficequotesdb-backend\misc\episode_links', 'rb') as fb:
@@ -121,7 +134,7 @@ def getEpisodeId(se):
 # renameFiles('Season2')
 
 # TODO: IMPORTANT DO NOT OVERWRITE ONLY APPEND. I have made changes to some quotes in the json file
-renameFiles('Season4')
+# renameFiles('AllSeasonUnmod')
 # print(getEpisodeId('06'))
-# convertFilesToUTF8('Season3')
-# subtitlesFolderWalk('Season2')
+# convertFilesToUTF8('AllSeasons')
+subtitlesFolderWalk('Season9')
