@@ -103,7 +103,7 @@ class ElasticSearchClient(object):
         self.index = 'index'
 
     def loadJSONFile(self, file):
-        with open(os.path.expanduser("~") + file, 'rb') as fp:
+        with open(os.path.expanduser("~") + file) as fp:
             return json.load(fp)
 
     def indexStats(self):
