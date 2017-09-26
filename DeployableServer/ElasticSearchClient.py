@@ -1,5 +1,5 @@
 import json
-from PyQt5 import QtCore
+import os
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import TransportError
@@ -7,7 +7,7 @@ from elasticsearch.helpers import bulk, streaming_bulk
 
 
 def create_quotes_index(client, index):
-    # we will use user on several places
+    # we will use user in several places
     create_index_body = {
         # 'settings': {
         #     # just one shard, no replicas for testing
@@ -102,8 +102,8 @@ class ElasticSearchClient(object):
         self.es = Elasticsearch()
         self.index = 'index'
 
-    def loadJSONFile(self):
-        with open('C:\\Users\\tjdaw\PycharmProjects\\theofficequotesdb-backend\misc\quote_db_s06.json', 'rb') as fp:
+    def loadJSONFile(self, file):
+        with open(os.path.expanduser("~") + file, 'rb') as fp:
             return json.load(fp)
 
     def indexStats(self):
@@ -112,8 +112,8 @@ class ElasticSearchClient(object):
     def indexProgress(self):
         return self.es.indices.stats()['_all']['primaries']['indexing']['index_total']
 
-    def indexES(self):
-        quotes = self.loadJSONFile()['lines']
+    def indexES(self, file='\PycharmProjects\\TheOfficeQuoteDatabase\misc\quote_db_all.json'):
+        quotes = self.loadJSONFile(file)['lines']
         line_ids = quotes.keys()
         create_quotes_index(self.es, self.index)
         for id in line_ids:
@@ -169,70 +169,3 @@ class ElasticSearchClient(object):
             }
         }}
 
-es = ElasticSearchClient()
-
-es.indexES()
-
-# # print(els.indexProgress())
-#
-# class Worker(QtCore.QThread):
-#
-#     updateProgress = QtCore.pyqtSignal(int)
-#
-#     def __init__(self, es):
-#         QtCore.QThread.__init__(self)
-#         self.es = es
-#
-#     def run(self):
-#
-#         #self.es.indices.delete("index")
-#         quotes = self.loadJSONFile()['lines']
-#         line_ids = quotes.keys()
-#         create_quotes_index(self.es, self.es.index)
-#         for id in line_ids:
-#             self.es.index(index=self.es.index, doc_type='us_office_lines', id=id, body=quotes[id])
-#             indexed = self.es.indices.stats()['_all']['primaries']['indexing']['index_total']
-#             self.updateProgress.emit(indexed)
-
-# els = ElasticSearchClient()
-# worker = Worker(els)
-# worker.start()
-# while worker.isRunning():
-#     print(worker.updateProgress.connect())
-"""
-curl -XGET 'localhost:9200/index/_analyze?pretty' -H 'Content-Type: application/json' -d'
-{
-    "line": "The quick & brown fox",
-    "analyzer": "custom_lowercase_stem  
-"""
-{
-    "settings": {
-        "analysis": {
-            "filter": {
-                "custom_english_stemmer": {
-                    "type": "stemmer",
-                    "name": "english"
-                }
-            },
-            "analyzer": {
-                "custom_lowercase_stemmed": {
-                    "tokenizer": "standard",
-                    "filter": [
-                        "lowercase",
-                        "custom_english_stemmer"
-                    ]
-                }
-            }
-        }
-    },
-    "mappings": {
-        "test": {
-            "properties": {
-                "text": {
-                    "type": "string",
-                    "analyzer": "custom_lowercase_stemmed"
-                }
-            }
-        }
-    }
-}
