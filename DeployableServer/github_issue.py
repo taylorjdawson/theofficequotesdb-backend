@@ -10,7 +10,6 @@ access_token = "d1e5ecf79a9782fb53f7af067feeb8803792fe5f"
 # Authentication for user filing issue (must have read/write access to
 # repository to add issue to)
 USERNAME = 'taylorjdawson'
-PASSWORD = 'Whether354<Information<above<<'
 
 # The repository to add this issue to
 REPO_OWNER = 'taylorjdawson'
