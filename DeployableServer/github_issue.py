@@ -5,10 +5,7 @@ import logging
 # TODO: Fix the logging issue organize them http://python-guide-pt-br.readthedocs.io/en/latest/writing/logging/
 logging.basicConfig(filename='githubissue.log', level=logging.DEBUG)
 
-access_token = "503a3a73add0c18a033161bd655a2dc72c994a18"
-
-# access_token = "21b54a004c6892bc26f205a48fcd10875189fe1a"
-
+access_token = "d1e5ecf79a9782fb53f7af067feeb8803792fe5f"
 
 # Authentication for user filing issue (must have read/write access to
 # repository to add issue to)
@@ -25,7 +22,7 @@ def make_github_issue(issue_content):
     '''Create an issue on github.com using the given parameters.'''
     # Our url to create issues via POST
     url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
-
+    "https://api.github.com/repos/octocat/Hello-World/issues/1347"
     # Create an authenticated session to create the issue
     session = requests.session()
     session.headers.update({'Authorization': "token " + access_token})
@@ -50,6 +47,7 @@ User message: {}
         status = {"message": "success"}
         print('Successfully created Issue "{}"'.format(title))
     else:
+        print(url); print(access_token)
         print(r.status_code)
         print('Could not create Issue "{}"'.format(title))
         # logging.error('Could not create Issue "{}"'.format(title))

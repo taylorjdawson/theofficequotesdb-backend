@@ -10,12 +10,23 @@ from urllib.parse import urlparse, parse_qs, unquote
 from DeployableServer.ElasticSearchClient import ElasticSearchClient
 from DeployableServer.github_issue import make_github_issue
 
+# TODO: As we add more routes into the server maker sure data is being sanitized
+# TODO: Sanatize the remove video clip data,
+
+# TODO: Move logging into this file
+# TODO: Reformat the logging, adding the date
+
+# TODO: Maybe move this into the myHandler Class??
+
+# TODO: Change the search http request format to this: 'http://35.185.217.146:9220/search?query=[query]'
+
 es = ElasticSearchClient()
+
+
 # es.indexES()
 # This class will handles any incoming request from
 # the browser
 class myHandler(BaseHTTPRequestHandler):
-
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
@@ -26,12 +37,10 @@ class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self._set_headers()
 
-        #Grab path parameters
+        # Grab path parameters
         params = parse_qs(urlparse(self.path).query)
 
         # issue = params['issue']
-
-        #TODO: Possible Handle a redirect for going to watch video
 
         # Try to grab the command group from the match object
         try:
@@ -42,7 +51,7 @@ class myHandler(BaseHTTPRequestHandler):
 
         except AttributeError:
             results = ''
-
+            # TODO: send back error malformed request
         self.wfile.write(json.dumps(results).encode())
         return
 
@@ -62,8 +71,10 @@ class myHandler(BaseHTTPRequestHandler):
         data = unquote(data)
         print(data)
 
-        m = re.match("issue_type=(?P<issue_type>.*)&issue_text=(?P<issue_text>.*)&line_id=(?P<line_id>.*)&line=(?P<line>.*)"
-                     , data)
+        # TODO: Better variable name c'mon man...smh
+        m = re.match(
+            "issue_type=(?P<issue_type>.*)&issue_text=(?P<issue_text>.*)&line_id=(?P<line_id>.*)&line=(?P<line>.*)"
+            , data)
 
         issue_content = dict(zip(("type", "message", "line_id", "line"), m.groups()))
 
